@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require "drb"
+require "pp"
+
+argv = ARGV.dup
+
+Drip = DRbObject.new_with_uri("druby://localhost:54321")
+pp Drip.send(*argv)

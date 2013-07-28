@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require "drb"
+require "orchestra/baton"
+
+DRb.start_service
+staff = DRbObject.new_with_uri("druby://localhost:12345")
+staff_p = Rinda::TupleSpaceProxy.new(staff)
+score = DRbObject.new_with_uri("druby://localhost:54321")
+Baton.new(staff_p, score).main_loop

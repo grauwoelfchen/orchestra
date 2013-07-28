@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require "drb"
+require "rinda/tuplespace"
+require "orchestra/phrase"
+
+DRb.start_service
+staff = DRbObject.new_with_uri("druby://localhost:12345")
+staff_p = Rinda::TupleSpaceProxy.new(staff)
+
+Phrase.new(staff_p).main_loop

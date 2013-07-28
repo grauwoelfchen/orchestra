@@ -1,0 +1,9 @@
+#!/usr/bin/env ruby
+
+require "drb"
+require "orchestra/score"
+
+score = Score.new(File.expand_path("~/.orchestra"))
+DRb.start_service("druby://localhost:54321", score)
+puts "score(drip): #{DRb.uri}"
+DRb.thread.join
