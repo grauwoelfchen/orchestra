@@ -15,7 +15,7 @@ class Phrase
   def main_loop
     loop do
       begin
-        tuple = @staff.take({"type" => "note", "status" => nil, "created_at" => nil}, 3)
+        tuple = @staff.take({"type" => "note", "status" => nil, "created_at" => nil})
         phrase = extract(tuple["status"])
         record(phrase)
       rescue Rinda::RequestExpiredError
@@ -38,15 +38,17 @@ class Phrase
     sentence = URI.escape(status["text"])
     uri = URI.parse("#{base}&appid=#{ENV["YAHOO_APPLICATION_ID"]}&sentence=#{sentence}")
     response = Net::HTTP.get(uri)
-    JSON.parse(response) unless response.nil? || response.empty?
+    JSON.parse(response)
   end
 
   def record(phrase)
     puts phrase # debug
-    @staff.write(
-      "type"       => "phrase",
-      "status"     => phrase,
-      "created_at" => Time.now
-    )
+    unless phrase.empty?
+      @staff.write(
+        "type"       => "phrase",
+        "status"     => phrase,
+        "created_at" => Time.now
+      )
+    end
   end
 end

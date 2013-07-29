@@ -22,6 +22,7 @@ class Stream
   def main_loop
     client = TweetStream::Client.new
     client.userstream do |status|
+      next if status.text =~ /RT|@(.*)/
       puts "#{status.user.screen_name}: #{status.text}" # debug
       @staff.write(
         "type"   => "note",

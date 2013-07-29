@@ -7,7 +7,7 @@ class Score < Drip
     Thread.new do
       synchronize do
         exit 0
-      end 
-    end 
-  end 
+      end
+    end
+  end
 end
