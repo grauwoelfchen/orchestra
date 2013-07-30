@@ -21,6 +21,7 @@ class Baton
         end
         print "#{buffers.length}\r" # debug
       end
+      puts Time.now
       movement = beat(buffers)
       perform do
         record(movement, @score)
