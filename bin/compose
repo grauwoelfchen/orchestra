@@ -1,10 +1,61 @@
 #!/usr/bin/env ruby
 # encoding: utf-8
 
+require "pathname"
+
+root = Pathname.new(__FILE__).realpath.parent.parent
+$:.unshift root.join("lib") if $0 == __FILE__
+
 require "drb"
-require "pp"
+require "optparse"
+
+require "orchestra"
+
+help = <<-HELP.gsub(/^\A\s*/, "")
+  #$0 ver.#{Orchestra::VERSION}
+  Usage:
+    compose {list|chart} [option]
+      -i I, --index=I   Index from HEAD. default 0
+      -n N, --number=N  Phrase counts. default 10
+  HELP
+actions = %w[
+  list chart
+]
+opts = {
+  :index  => 0,
+  :number => 10
+}
+
+parser = OptionParser.new
+parser.on("-i v", "--index v")  { |v| opts[:index] = v.to_i }
+parser.on("-n v", "--number v") { |v| opts[:number] = v.to_i }
+parser.on("-v", "--version")    { puts Orchestra::VERSION; exit }
+parser.on_tail("-h", "--help")  { puts help; exit }
 
 argv = ARGV.dup
+action = actions.include?(argv[0]) ? argv[0].intern : :list
 
-Drip = DRbObject.new_with_uri("druby://localhost:54321")
-pp Drip.send(*argv)
+begin
+  parser.parse!(argv)
+rescue OptionParser::MissingArgument,
+       OptionParser::InvalidArgument,
+       OptionParser::InvalidOption
+  puts help; exit
+end
+
+score = DRbObject.new_with_uri("druby://localhost:54321")
+((k,(h,d)),_) = score.send(:head, opts[:index] + 1)
+
+if action == :chart
+  require "googlecharts"
+  puts Gchart.pie(
+    :title  => d.to_s,
+    :legend => h.keys[0..opts[:number]],
+    :data   => h.values[0..opts[:number]],
+    :size   => "500x#{(200 + opts[:number] * 2.5).to_i.to_s}"
+  )
+else # :list
+  h.to_a[0..opts[:number]].each do |phrase, point|
+    puts "#{phrase}: #{point}"
+  end
+end

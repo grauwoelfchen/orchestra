@@ -21,6 +21,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "drip"
   spec.add_dependency "foreman"
   spec.add_dependency "tweetstream"
+  spec.add_dependency "googlecharts"
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
