@@ -1,5 +1,9 @@
 # encoding: utf-8
 
+require "drb"
+require "rinda/tuplespace"
+require "net/http"
+
 module Concertable
   def retrievable?
     if @retry > 0
@@ -14,9 +18,12 @@ module Concertable
     restart
     begin
       yield
-    rescue Rinda::RequestExpiredError
-      # pass
-    rescue DRb::DRbConnError
+    rescue Rinda::RequestExpiredError # tuplespace
+      nil
+    rescue Net::HTTPForbidden # net
+      nil
+    rescue DRb::DRbConnError,
+           Net::HTTPServerError
       retrievable? ? sleep(10) : raise
     end
   end

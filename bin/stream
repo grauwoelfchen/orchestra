@@ -11,4 +11,8 @@ port = ARGV[0] || "10061"
 DRb.start_service
 staff = DRbObject.new_with_uri("druby://localhost:#{port}")
 staff_p = Rinda::TupleSpaceProxy.new(staff)
-Stream.new(staff_p).main_loop
+
+port = ARGV[1] || "10063"
+DRb.start_service
+acoustic = DRbObject.new_with_uri("druby://localhost:#{port}")
+Stream.new(staff_p, acoustic).main_loop

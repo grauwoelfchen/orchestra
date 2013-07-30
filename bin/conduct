@@ -11,15 +11,18 @@ require "optparse"
 
 require "orchestra"
 
-help = <<-HELP.gsub(/^\A\s*/, "")
+help = <<-HELP.gsub(/^\s{2}/, "")
   #$0 ver.#{Orchestra::VERSION}
   Usage:
-    compose {list|chart} [option]
+    conductor {list|chart|tweet} [option]
       -i I, --index=I   Index from HEAD. default 0
-      -n N, --number=N  Phrase counts. default 10
+      -n N, --number=N  Phrase counts. If action is tweet, this option is ignored. default 10
+      -p P, --port=P    Port number for service
+  Example:
+    conductor list -i 0 -n 3 -p 10061
   HELP
 actions = %w[
-  list chart
+  list chart tweet
 ]
 opts = {
   :index  => 0,
@@ -29,6 +32,7 @@ opts = {
 parser = OptionParser.new
 parser.on("-i v", "--index v")  { |v| opts[:index] = v.to_i }
 parser.on("-n v", "--number v") { |v| opts[:number] = v.to_i }
+parser.on("-p v", "--port v")   { |v| opts[:port] = v.to_i }
 parser.on("-v", "--version")    { puts Orchestra::VERSION; exit }
 parser.on_tail("-h", "--help")  { puts help; exit }
 
@@ -43,10 +47,12 @@ rescue OptionParser::MissingArgument,
   puts help; exit
 end
 
-score = DRbObject.new_with_uri("druby://localhost:54321")
-((k,(h,d)),_) = score.send(:head, opts[:index] + 1)
+port = opts[:port] || "10060"
+store = DRbObject.new_with_uri("druby://localhost:#{port}")
+((k,(h,d)),_) = store.send(:head, (opts[:index] || 0) + 1)
 
-if action == :chart
+case action
+when :chart
   require "googlecharts"
   puts Gchart.pie(
     :title  => d.to_s,
@@ -54,8 +60,15 @@ if action == :chart
     :data   => h.values[0..opts[:number]],
     :size   => "500x#{(200 + opts[:number] * 2.5).to_i.to_s}"
   )
-else # :list
-  h.to_a[0..opts[:number]].each do |phrase, point|
-    puts "#{phrase}: #{point}"
+when :tweet
+  if h["status"]
+    puts "#{h["status"]["user.screen_name"]}: #{h["status"]["text"]} at #{h["status"]["created_at"]}"
+  end
+when :list
+  ((_,(h,d)),_) = store.send(:head, (opts[:index] || 0) + 1)
+  unless h["status"]
+    h.to_a[0...opts[:number]].each do |phrase, point|
+      puts "#{phrase}: #{point}"
+    end
   end
 end

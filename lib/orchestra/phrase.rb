@@ -16,39 +16,40 @@ class Phrase
 
   def main_loop
     loop do
-      tuple = perform do
-        @staff.take({"type" => "note", "status" => nil, "created_at" => nil})
-      end
+      tuple = read(@staff)
       phrase = extract(tuple)
-      perform do
-        record(phrase, @staff)
-      end
+      record(phrase, @staff)
     end
   end
 
   private
 
+  def read(staff)
+    perform do
+      staff.take({"type" => "note", "status" => nil, "created_at" => nil})
+    end
+  end
+
   def extract(tuple)
     return unless tuple.is_a? Hash
     status = tuple["status"]
-    # TODO
-    # add error handling
     base = "http://jlp.yahooapis.jp/KeyphraseService/V1/extract?output=json"
     sentence = URI.escape(status["text"])
-    begin
-      uri = URI.parse("#{base}&appid=#{ENV["YAHOO_APPLICATION_ID"]}&sentence=#{sentence}")
+    uri = URI.parse("#{base}&appid=#{ENV["YAHOO_APPLICATION_ID"]}&sentence=#{sentence}")
+    perform do
       response = Net::HTTP.get(uri)
-    rescue Net::HTTPForbidden
+      JSON.parse(response)
     end
-    JSON.parse(response)
   end
 
   def record(phrase, staff)
     puts phrase # debug
-    staff.write(
-      "type"       => "phrase",
-      "status"     => phrase,
-      "created_at" => Time.now
-    ) unless phrase.empty?
+    perform do
+      staff.write(
+        "type"       => "phrase",
+        "status"     => phrase,
+        "created_at" => Time.now
+      ) unless phrase.empty?
+    end
   end
 end

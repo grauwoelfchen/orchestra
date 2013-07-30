@@ -7,8 +7,9 @@ require "orchestra/concerns/concertable"
 class Stream
   include Concertable
 
-  def initialize(staff)
+  def initialize(staff, acoustic)
     @staff = staff
+    @acoustic = acoustic
     configure
   end
 
@@ -17,9 +18,8 @@ class Stream
     client.userstream do |status|
       next if status.text =~ /RT|@(.*)/
       puts "#{status.user.screen_name}: #{status.text}" # debug
-      perform do
-        record(status, @staff)
-      end
+      tweet = tuple(status)
+      record(tweet, @staff) && track(tweet, @acoustic)
     end
   end
   
@@ -35,16 +35,32 @@ class Stream
     end
   end
 
-  def record(status, staff)
-    staff.write(
-      "type"   => "note",
-      "status" => {
-        "id"               => status.id,
-        "user.screen_name" => status.user.screen_name,
-        "text"             => status.text,
-        "created_at"       => status.created_at,
-      },
-      "created_at" => Time.now
-    )
+  def tuple(status)
+    begin
+      {
+        "type"   => "note",
+        "status" => {
+          "id"               => status.id,
+          "user.screen_name" => status.user.screen_name,
+          "text"             => status.text,
+          "created_at"       => status.created_at,
+        },
+        "created_at" => Time.now
+      }
+    rescue StandardError
+      {}
+    end
+  end
+
+  def record(tweet, staff)
+    perform do
+      staff.write(tweet) unless tweet.empty?
+    end
+  end
+
+  def track(tweet, acoustic)
+    perform do
+      acoustic.write(tweet) unless tweet.empty?
+    end
   end
 end

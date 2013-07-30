@@ -16,10 +16,13 @@ class Baton
       interval = Time.now + 60 * 10
       buffers = []
       while Time.now < interval do
-        buffers << perform do
-          @staff.take({"type" => "phrase", "status" => nil, "created_at" => nil})
+        phrase = perform do
+          @staff.take({"type" => "phrase", "status" => nil, "created_at" => nil}, 0)
         end
-        print "#{buffers.length}\r" # debug
+        if phrase
+          buffers << phrase
+          print "#{buffers.length}\r" # debug
+        end
       end
       puts Time.now
       movement = beat(buffers)
@@ -34,8 +37,13 @@ class Baton
   def beat(buffers)
     puts "buffers.length #=> #{buffers.length}" # debug
     unless buffers.empty?
-      movement = buffers.map{|phrase| phrase["status"] }.inject {|m, e| m.merge(e) {|k, o, n| o + n } }
-      Hash[movement.sort { |a, b| b[1] <=> a[1] }]
+      movement = buffers.map{|phrase| phrase["status"] }.inject {|m,e| m.merge(e) {|k,o,n| o + n } }
+      begin
+        Hash[movement.sort { |a,b| b[1] <=> a[1] }]
+      rescue ArgumentError
+        require "pry"
+        binding.pry
+      end
     end
   end
 
