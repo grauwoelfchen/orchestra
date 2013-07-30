@@ -4,7 +4,8 @@
 require "drb"
 require "rinda/tuplespace"
 
+port = ARGV[0] || "10061"
 ts = Rinda::TupleSpace.new
-DRb.start_service("druby://localhost:12345", ts)
+DRb.start_service("druby://localhost:#{port}", ts)
 puts "staff(tuplespace): #{DRb.uri}"
 DRb.thread.join

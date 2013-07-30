@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require "drb"
+require "orchestra/acoustic"
+
+port = ARGV[0] || "10063"
+acoustic = Acoustic.new(File.expand_path("~/.orchestra/acoustic"))
+DRb.start_service("druby://localhost:#{port}", acoustic)
+puts "score(drip): #{DRb.uri}"
+DRb.thread.join

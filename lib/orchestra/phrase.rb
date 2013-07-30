@@ -35,8 +35,11 @@ class Phrase
     # add error handling
     base = "http://jlp.yahooapis.jp/KeyphraseService/V1/extract?output=json"
     sentence = URI.escape(status["text"])
-    uri = URI.parse("#{base}&appid=#{ENV["YAHOO_APPLICATION_ID"]}&sentence=#{sentence}")
-    response = Net::HTTP.get(uri)
+    begin
+      uri = URI.parse("#{base}&appid=#{ENV["YAHOO_APPLICATION_ID"]}&sentence=#{sentence}")
+      response = Net::HTTP.get(uri)
+    rescue Net::HTTPForbidden
+    end
     JSON.parse(response)
   end
 

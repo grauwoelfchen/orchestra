@@ -1,9 +1,11 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
 
 require "drb"
 require "orchestra/score"
 
-score = Score.new(File.expand_path("~/.orchestra"))
-DRb.start_service("druby://localhost:54321", score)
+port = ARGV[0] || "10060"
+score = Score.new(File.expand_path("~/.orchestra/score"))
+DRb.start_service("druby://localhost:#{port}", score)
 puts "score(drip): #{DRb.uri}"
 DRb.thread.join
