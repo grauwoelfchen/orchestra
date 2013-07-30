@@ -1,28 +1,30 @@
 # encoding: utf-8
 
 require "rinda/tuplespace"
+require "orchestra/concerns/concertable"
 
 class Baton
+  include Concertable
+
   def initialize(staff, score)
     @staff = staff
     @score = score
-    @buffers = []
   end
 
   def main_loop
     loop do
       interval = Time.now + 60 * 10
+      buffers = []
       while Time.now < interval do
-        begin
-          @buffers << @staff.take({"type" => "phrase", "status" => nil, "created_at" => nil})
-          print "#{@buffers.length}\r"
-        rescue Rinda::RequestExpiredError
-          # pass
+        buffers << perform do
+          @staff.take({"type" => "phrase", "status" => nil, "created_at" => nil})
         end
+        print "#{buffers.length}\r" # debug
       end
-      movement = beat(@buffers)
-      @buffers.clear
-      record(movement, @score) if movement
+      movement = beat(buffers)
+      perform do
+        record(movement, @score)
+      end if movement
     end
   end
 
@@ -31,13 +33,8 @@ class Baton
   def beat(buffers)
     puts "buffers.length #=> #{buffers.length}" # debug
     unless buffers.empty?
-      movement = buffers.map{|phrase| phrase["status"] }.inject {|m, e| m.merge(e) }
-      begin
+      movement = buffers.map{|phrase| phrase["status"] }.inject {|m, e| m.merge(e) {|k, o, n| o + n } }
       Hash[movement.sort { |a, b| b[1] <=> a[1] }]
-      rescue ArgumentError
-        require "pry"
-        binding.pry
-      end
     end
   end
 

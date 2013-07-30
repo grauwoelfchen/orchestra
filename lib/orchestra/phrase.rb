@@ -5,35 +5,34 @@ require "rinda/tuplespace"
 require "net/http"
 require "uri"
 require "json"
+require "orchestra/concerns/concertable"
 
 class Phrase
+  include Concertable
+
   def initialize(staff)
     @staff = staff
-    @retry = 3
   end
 
   def main_loop
     loop do
-      begin
-        tuple = @staff.take({"type" => "note", "status" => nil, "created_at" => nil})
-        phrase = extract(tuple["status"])
-        record(phrase)
-      rescue Rinda::RequestExpiredError
-        # pass
-      rescue DRb::DRbConnError
-        if @retry > 0
-          @retry -= 1
-          sleep 10
-        else
-          raise
-        end
+      tuple = perform do
+        @staff.take({"type" => "note", "status" => nil, "created_at" => nil})
+      end
+      phrase = extract(tuple)
+      perform do
+        record(phrase, @staff)
       end
     end
   end
 
   private
 
-  def extract(status)
+  def extract(tuple)
+    return unless tuple.is_a? Hash
+    status = tuple["status"]
+    # TODO
+    # add error handling
     base = "http://jlp.yahooapis.jp/KeyphraseService/V1/extract?output=json"
     sentence = URI.escape(status["text"])
     uri = URI.parse("#{base}&appid=#{ENV["YAHOO_APPLICATION_ID"]}&sentence=#{sentence}")
@@ -41,14 +40,12 @@ class Phrase
     JSON.parse(response)
   end
 
-  def record(phrase)
+  def record(phrase, staff)
     puts phrase # debug
-    unless phrase.empty?
-      @staff.write(
-        "type"       => "phrase",
-        "status"     => phrase,
-        "created_at" => Time.now
-      )
-    end
+    staff.write(
+      "type"       => "phrase",
+      "status"     => phrase,
+      "created_at" => Time.now
+    ) unless phrase.empty?
   end
 end
