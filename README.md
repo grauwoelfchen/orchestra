@@ -1,24 +1,26 @@
 # Orchestra
 
-KeyPhrase analyzer for your timeline.
+Key phrase analyzer for your timeline.
 
 1. Twitter Streaming API
 2. TupleSpace
-3. Yahoo! KeyPhrase API
+3. Yahoo! Key phrase API
 4. TupleSpace
 5. Drip
 
 
 ## Installation
 
+acoustic
+:  Drip for tweets
 staff
-:  Our TupleSpace
+:  TupleSpace
 score
-:  Drip (like KVS)
+:  Drip for key phrases
 stream
 :  Worker for Twitter Streaming API
 phrase
-:  Worker for Yahoo! keyphrase API
+:  Worker for Yahoo! key phrase API
 compose
 :  API for you
 
@@ -31,6 +33,7 @@ First you have to set environments into `.env` (see `.env.sample`).
 Then,
 
 ```
+$ bundle exec foreman run bin/acoustic
 $ bundle exec foreman run bin/staff
 $ bundle exec foreman run bin/score
 $ bundle exec foreman run bin/stream
