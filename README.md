@@ -6,7 +6,7 @@ Key phrase analyzer for your timeline.
 2. TupleSpace
 3. Yahoo! Key phrase API
 4. TupleSpace
-5. Drip
+5. Drip * 2
 
 
 ## Installation
@@ -21,13 +21,13 @@ stream
 :  Worker for Twitter Streaming API
 phrase
 :  Worker for Yahoo! key phrase API
-compose
-:  API for you
+conduct
+:  Command for you
 
 
 ## Usage
 
-I recommend use of daemontools.
+I recommend to use daemontools :)
 
 First you have to set environments into `.env` (see `.env.sample`).  
 Then,
@@ -40,13 +40,19 @@ $ bundle exec foreman run bin/stream
 $ bundle exec foreman run bin/phrase
 ```
 
-After few minutes later,
+
+## Example
 
 ```
-$ bundle exec foreman run bin/compose
-```
+# shows newest 10 key phrases
+$ bundle exec foreman run bin/conduct list -i 0 -n 10 -p 10060 (score)
 
-You are composer ;)
+# creates google chart link
+$ bundle exec foreman run bin/conduct chart -i 0 -n 5 -p 10060 (score)
+
+# shows newest 5 tweets
+$ bundle exec foreman run bin/conduct tweet -i 0 -n 5 -p 10063 (acoustic)
+```
 
 
 ## Contributing
