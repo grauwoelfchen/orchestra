@@ -31,7 +31,7 @@ class Phrase
   end
 
   def extract(tuple)
-    return unless tuple.is_a? Hash
+    return unless tuple.is_a?(Hash)
     status = tuple["status"]
     base = "http://jlp.yahooapis.jp/KeyphraseService/V1/extract?output=json"
     sentence = URI.escape(status["text"])
@@ -40,7 +40,14 @@ class Phrase
       perform do
         response = Net::HTTP.get(uri)
         result = JSON.parse(response)
-        result["Error"].is_a?(Hash) ? nil : result
+        return nil if result.empty? # no phrase
+        if result.is_a?(Hash) && \
+           result.values.reject{|e| e.is_a?(Fixnum) }.empty?
+          result
+        else
+          puts "Error : #{result}" # debug
+          nil
+        end
       end
     end
   end
