@@ -17,9 +17,9 @@ help = <<-HELP.gsub(/^\s{2}/, "")
     conductor {list|chart|tweet} [option]
       -i I, --index=I   Index from HEAD. default 0
       -n N, --number=N  Phrase counts. If action is tweet, this option is ignored. default 10
-      -p P, --port=P    Port number for service
+      -p P, --port=P    Port number of score server. default 10060
   Example:
-    conductor list -i 0 -n 3 -p 10061
+    conductor list --index 0 --number 3 --port 10060
   HELP
 actions = %w[
   list chart tweet
@@ -47,14 +47,24 @@ rescue OptionParser::MissingArgument,
   puts help; exit
 end
 
-def element(index, store) # first
-  ((_,(h,d)),_) = store.send(:head, (index ||0) + 1)
+def element(index, tag, score) # first
+  ((_,(h,d)),_) = score.send(:head, (index ||0) + 1, tag)
   [h,d]
 end
 
-port = opts[:port] || "10060"
-store = DRbObject.new_with_uri("druby://localhost:#{port}")
-h,d = element(opts[:index], store)
+def tag(action)
+  tags = {
+    :list  => "movement",
+    :chart => "movement",
+    :tweet => "note",
+  }
+  tags[action]
+end
+
+port  = opts[:port] || "10060"
+tag   = tag(action)
+score = DRbObject.new_with_uri("druby://localhost:#{port}")
+h,d = element(opts[:index], tag, score)
 
 case action
 when :chart
@@ -69,10 +79,10 @@ when :tweet
   if h && h["status"]
     tweets = []
     opts[:number].times do |n|
-      h,_ = element(opts[:index] + n, store)
+      h,_ = element(opts[:index] + n, tag, score)
       tweets << h
     end
-    tweets.each do |t|
+    tweets.uniq.each do |t|
       puts "#{t["status"]["user.screen_name"]}: #{t["status"]["text"]} at #{t["status"]["created_at"]}"
     end
   end

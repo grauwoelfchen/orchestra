@@ -6,17 +6,15 @@ Key phrase analyzer for your timeline.
 2. TupleSpace
 3. Yahoo! Key phrase API
 4. TupleSpace
-5. Drip * 2
+5. Drip
 
 
 ## Installation
 
-acoustic
-:  Drip for tweets
 staff
 :  TupleSpace
 score
-:  Drip for key phrases
+:  Drip
 stream
 :  Worker for Twitter Streaming API
 phrase
@@ -33,7 +31,6 @@ First you have to set environments into `.env` (see `.env.sample`).
 Then,
 
 ```
-$ bundle exec foreman run bin/acoustic
 $ bundle exec foreman run bin/staff
 $ bundle exec foreman run bin/score
 $ bundle exec foreman run bin/stream
@@ -45,13 +42,13 @@ $ bundle exec foreman run bin/phrase
 
 ```
 # shows newest 10 key phrases
-$ bundle exec foreman run bin/conduct list -i 0 -n 10 -p 10060 (score)
+$ bundle exec foreman run bin/conduct list --index 0 --number 10 --port 10060 (score port)
 
 # creates google chart link
-$ bundle exec foreman run bin/conduct chart -i 0 -n 5 -p 10060 (score)
+$ bundle exec foreman run bin/conduct chart -i 0 -n 5
 
 # shows newest 5 tweets
-$ bundle exec foreman run bin/conduct tweet -i 0 -n 5 -p 10063 (acoustic)
+$ bundle exec foreman run bin/conduct tweet -i 0 -n 5
 ```
 
 

@@ -26,12 +26,12 @@ class Phrase
 
   def read(staff)
     perform do
-      staff.take({"type" => "note", "status" => nil, "created_at" => nil})
+      staff.take({"type" => "note", "status" => nil})
     end
   end
 
   def extract(tuple)
-    return unless tuple.is_a?(Hash)
+    return nil unless tuple.is_a?(Hash)
     status = tuple["status"]
     base = "http://jlp.yahooapis.jp/KeyphraseService/V1/extract?output=json"
     sentence = URI.escape(status["text"])
@@ -57,9 +57,8 @@ class Phrase
     puts phrase # debug
     perform do
       staff.write(
-        "type"       => "phrase",
-        "status"     => phrase,
-        "created_at" => Time.now
+        "type"   => "phrase",
+        "status" => phrase,
       ) unless phrase.empty?
     end
   end

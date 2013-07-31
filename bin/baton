@@ -9,7 +9,7 @@ DRb.start_service
 staff = DRbObject.new_with_uri("druby://localhost:#{port}")
 staff_p = Rinda::TupleSpaceProxy.new(staff)
 
-port = ARGV[1] || "10062"
+port = ARGV[1] || "10060"
 DRb.start_service
 score = DRbObject.new_with_uri("druby://localhost:#{port}")
 Baton.new(staff_p, score).main_loop
