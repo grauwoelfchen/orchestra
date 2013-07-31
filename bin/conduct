@@ -48,7 +48,7 @@ rescue OptionParser::MissingArgument,
 end
 
 def element(index, store) # first
-  ((k,(h,d)),_) = store.send(:head, (index || 0) + 1)
+  ((_,(h,d)),_) = store.send(:head, (index ||0) + 1)
   [h,d]
 end
 
@@ -66,9 +66,9 @@ when :chart
     :size   => "500x#{(200 + opts[:number] * 2.5).to_i.to_s}"
   )
 when :tweet
-  if h["status"]
+  if h && h["status"]
     tweets = []
-    opts[:number].times.with_index(1) do |n|
+    opts[:number].times do |n|
       h,_ = element(opts[:index] + n, store)
       tweets << h
     end
@@ -77,7 +77,7 @@ when :tweet
     end
   end
 when :list
-  unless h["status"]
+  unless h && h["status"]
     h.to_a[0...opts[:number]].each do |phrase, point|
       puts "#{phrase}: #{point}"
     end
