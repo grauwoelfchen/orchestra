@@ -24,7 +24,7 @@ class Baton
           print "#{buffers.length}\r" # debug
         end
       end
-      puts Time.now
+      puts Time.now #debug
       movement = beat(buffers)
       perform do
         record(movement, @score)
@@ -37,14 +37,14 @@ class Baton
   def beat(buffers)
     puts "buffers.length #=> #{buffers.length}" # debug
     unless buffers.empty?
-      movement = buffers.map{|phrase| phrase["status"] }.inject {|m,e| m.merge(e) {|k,o,n| o + n } }
-      begin
-        Hash[movement.sort { |a,b| b[1] <=> a[1] }]
-      rescue ArgumentError
-        require "pry"
-        binding.pry
-      end
+      movement = buffers.map {|b| b["status"] }.inject {|m,e| m.merge(e) {|_,o,n| o + n } }
+      movement = filter(movement)
+      Hash[movement.sort { |a,b| b[1] <=> a[1] }]
     end
+  end
+
+  def filter(movement)
+    movement.reject{|k,v| !v.is_a?(Fixnum) }
   end
 
   def record(movement, score)

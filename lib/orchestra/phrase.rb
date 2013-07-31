@@ -35,14 +35,18 @@ class Phrase
     status = tuple["status"]
     base = "http://jlp.yahooapis.jp/KeyphraseService/V1/extract?output=json"
     sentence = URI.escape(status["text"])
-    uri = URI.parse("#{base}&appid=#{ENV["YAHOO_APPLICATION_ID"]}&sentence=#{sentence}")
-    perform do
-      response = Net::HTTP.get(uri)
-      JSON.parse(response)
+    unless sentence.empty?
+      uri = URI.parse("#{base}&appid=#{ENV["YAHOO_APPLICATION_ID"]}&sentence=#{sentence}")
+      perform do
+        response = Net::HTTP.get(uri)
+        result = JSON.parse(response)
+        result["Error"].is_a?(Hash) ? nil : result
+      end
     end
   end
 
   def record(phrase, staff)
+    return unless phrase
     puts phrase # debug
     perform do
       staff.write(
