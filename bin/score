@@ -5,7 +5,7 @@ require "drb"
 require "orchestra/score"
 
 port = ARGV[0] || "10060"
-score = Score.new(File.expand_path("~/.orchestra/score"))
+score = Score.new(File.expand_path("~/.orchestra"))
 DRb.start_service("druby://localhost:#{port}", score)
 puts "score(drip): #{DRb.uri}"
 DRb.thread.join
