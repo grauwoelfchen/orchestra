@@ -11,23 +11,35 @@ Key phrase analyzer for your timeline.
 
 ## Installation
 
-staff
-:  TupleSpace
-score
-:  Drip
-stream
-:  Worker for Twitter Streaming API
-phrase
-:  Worker for Yahoo! key phrase API
-conduct
-:  Command for you
+with `ruby-1.9.3p448`
+
+```
+% ruby --version
+ruby 1.9.3p448 (2013-06-27 revision 41675) [x86_64-linux]
+
+% git clone https://github.com/grauwoelfchen/orchestra.git
+% bundle install --path .bundle/gems
+```
 
 
 ## Usage
 
+| Name | What |
+|---|---|
+| staff | TupleSpace (default port: 10061) |
+| score | Drip (default port: 10060, locaiton is `$HOME/.orchestra`) |
+| stream | Worker for Twitter Streaming API |
+| phrase | Worker for Yahoo! key phrase API
+| conduct | Command-line interface for you |
+
 I recommend to use daemontools :)
 
-First you have to set environments into `.env` (see `.env.sample`).  
+First you have to set environment vars into `.env` (see `.env.sample`).  
+This application needs ID and secret for following APIs.
+
+* Twitter Streaming API
+* Yahoo! Japan Keyphrase API
+
 Then,
 
 ```
@@ -50,6 +62,11 @@ $ bundle exec foreman run bin/conduct chart -i 0 -n 5
 # shows newest 5 tweets
 $ bundle exec foreman run bin/conduct tweet -i 0 -n 5
 ```
+
+
+## License
+
+GPLv3
 
 
 ## Contributing
